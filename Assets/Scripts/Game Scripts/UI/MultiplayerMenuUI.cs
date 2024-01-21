@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -14,13 +12,8 @@ public class MultiplayerMenuUI : MonoBehaviour
     [SerializeField] private Button newLobbyButton;
     [SerializeField] private Button codeJoinButton;
     [SerializeField] private TMP_InputField codeInputField;
-
-    [SerializeField] private Button closeButton;
     [SerializeField] private GameObject multiplayerMenuUI;
     [SerializeField] private GameObject newLobbyUI;
-
-    
-
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +22,7 @@ public class MultiplayerMenuUI : MonoBehaviour
         newLobbyButton.interactable = false;
         codeJoinButton.interactable = false;
 
-        playerNameInputField.onValueChanged.AddListener(delegate 
+        playerNameInputField.onValueChanged.AddListener(delegate
         {
             InputValueCheck();
             MultiplayerManager.Instance.SetPlayerName(playerNameInputField.text);
@@ -64,19 +57,11 @@ public class MultiplayerMenuUI : MonoBehaviour
         {
             LobbyManager.Instance.JoinWithCode(codeInputField.text);
         });
-
-
-        closeButton.onClick.AddListener(() =>
-        {
-            multiplayerMenuUI.SetActive(false);
-        });
-
-
     }
 
     public void InputValueCheck()
     {
-        if(playerNameInputField.text != null && playerNameInputField.text.Length > 0)
+        if (playerNameInputField.text != null && playerNameInputField.text.Length > 0)
         {
             quickJoinButton.interactable = true;
             newLobbyButton.interactable = true;
@@ -94,8 +79,6 @@ public class MultiplayerMenuUI : MonoBehaviour
             quickJoinButton.interactable = false;
             newLobbyButton.interactable = false;
             codeJoinButton.interactable = false;
-        }            
-
+        }
     }
-
 }
