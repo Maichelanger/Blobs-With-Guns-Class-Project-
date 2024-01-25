@@ -18,10 +18,11 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private List<GameObject> skinList;
 
     private Rigidbody2D rb;
-    private Animator anim;
+    //private Animator anim;
     private PlayerData localPlayerData;
     private GameObject localSkin;
     private int skinIndex = 0;
+    private Camera mainCamera;
 
     private bool right;
 
@@ -40,7 +41,7 @@ public class PlayerController : NetworkBehaviour
         //   localPlayerData.playerName = MultiplayerManager.Instance.GetPlayerName();
 
         rb = GetComponent<Rigidbody2D>();
-        anim = GetComponentInChildren<Animator>();
+        //anim = GetComponentInChildren<Animator>();
         localSkin = skinList[skinIndex];
         weapon.transform.SetParent(localSkin.transform);
 
@@ -63,50 +64,51 @@ public class PlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (right)
-            localSkin.transform.rotation = Quaternion.identity;
-        else
-            localSkin.transform.rotation = Quaternion.Euler(0, 180, 0);
-
         if (!IsOwner)
             return;
 
         Move();
         CheckFire();
-
-
     }
 
     public void Move()
     {
-        rb.velocity = (transform.right * velocidad * Input.GetAxis("Horizontal")) +
-                   (transform.up * rb.velocity.y);
+        if (this.transform.rotation == Quaternion.identity) // Desplazamiento hacia la derecha
+        {
+            rb.velocity = (transform.right * velocidad * Input.GetAxis("Horizontal")) +
+                    (transform.up * rb.velocity.y);
+        }
+        else
+        { // Desplazamiento hacia la izuquierda
+            rb.velocity = -(transform.right * velocidad * Input.GetAxis("Horizontal")) +
+                (transform.up * rb.velocity.y);
+        }
 
-        this.transform.SetLocalPositionAndRotation(this.transform.position, Quaternion.identity);
+        // Actualizamos la posición
+        this.transform.SetLocalPositionAndRotation(this.transform.position, this.transform.rotation);
 
-        if (Input.GetButtonDown("Vertical") && (Mathf.Abs(rb.velocity.y) < 0.2f))
+
+        // Rotamos el jugador en función de la pulsación de teclas.
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            this.transform.rotation = Quaternion.identity;
+        }
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            this.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        }
+
+        // Configuración del salto.
+        if (Input.GetKeyDown(KeyCode.UpArrow) && (Mathf.Abs(rb.velocity.y) < 0.2f))
         {
             rb.AddForce(transform.up * fuerzaSalto);
         }
 
-        anim.SetFloat("velocidadX", Mathf.Abs(rb.velocity.x));
-        anim.SetFloat("velocidadY", rb.velocity.y);
+        // Actualizamos la animación
+        //anim.SetFloat("velocidadX", Mathf.Abs(rb.velocity.x));
+        //anim.SetFloat("velocidadY", rb.velocity.y);
 
-
-
-        if (rb.velocity.x > 0.1f)
-        {
-
-            right = true;
-        }
-        else if (rb.velocity.x < -0.1f)
-        {
-            right = false;
-
-        }
-
-
-
+        Camera.main.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, -10f);
     }
 
 
@@ -157,7 +159,7 @@ public class PlayerController : NetworkBehaviour
         localSkin = newSkin;
 
         // Actualizamos la animación
-        anim = GetComponentInChildren<Animator>();
+        //anim = GetComponentInChildren<Animator>();
     }
 
 
