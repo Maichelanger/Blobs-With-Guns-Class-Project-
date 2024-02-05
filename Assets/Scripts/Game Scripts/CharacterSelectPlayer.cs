@@ -48,8 +48,6 @@ public class CharacterSelectPlayer : MonoBehaviour
                 skin.SetActive(false);
             }
 
-            skinList[playerData.skinIndex].SetActive(true);
-
             if (playerData.color != null)
             {
                 GetComponentInChildren<SpriteRenderer>().color = playerData.color;

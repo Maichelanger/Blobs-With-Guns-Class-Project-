@@ -99,7 +99,6 @@ public class PlayerController : NetworkBehaviour
     public void PlayerSetUp(ulong clientId)
     {
         localPlayerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(clientId);
-        SetPlayerSkin(localPlayerData.skinIndex);
         SetPlayerColor(localPlayerData.color);
     }
 

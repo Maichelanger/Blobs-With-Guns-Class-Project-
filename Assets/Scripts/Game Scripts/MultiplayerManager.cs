@@ -82,7 +82,6 @@ public class MultiplayerManager : NetworkBehaviour
         playerDataNetworkList.Add(new PlayerData
         {
             clientId = clientId,
-            skinIndex = 0,
             color = Color.white
         });
         SetPlayerNameServerRpc(GetPlayerName());
@@ -176,32 +175,6 @@ public class MultiplayerManager : NetworkBehaviour
     public PlayerData GetPlayerDataFromPlayerIndex(int playerIndex)
     {
         return playerDataNetworkList[playerIndex];
-    }
-
-    public int GetPlayerSkinIndexFromPlayerIndex(int playerIndex)
-    {
-        return playerDataNetworkList[playerIndex].skinIndex;
-    }
-
-
-    public void SetPlayerSkin(int skinIndex)
-    {
-        ChangePlayerSkinServerRpc(skinIndex);
-    }
-
-
-
-    [ServerRpc(RequireOwnership = false)]
-    private void ChangePlayerSkinServerRpc(int skinIndex, ServerRpcParams serverRpcParams = default)
-    {
-
-        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
-
-        PlayerData playerData = playerDataNetworkList[playerDataIndex];
-
-        playerData.skinIndex = skinIndex;
-
-        playerDataNetworkList[playerDataIndex] = playerData;
     }
 
 
