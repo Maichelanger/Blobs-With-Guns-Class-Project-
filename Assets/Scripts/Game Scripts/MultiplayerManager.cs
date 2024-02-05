@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEngine;
 using Unity.Services.Authentication;
+using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
@@ -17,6 +17,7 @@ public class MultiplayerManager : NetworkBehaviour
     public event EventHandler OnTryingToJoinGame;
     public event EventHandler OnFailedToJoinGame;
     public event EventHandler OnPlayerDataNetworkListChanged;
+    public event EventHandler ConnectionApprovalCallBack;
 
 
     private NetworkList<PlayerData> playerDataNetworkList;
@@ -26,8 +27,6 @@ public class MultiplayerManager : NetworkBehaviour
     {
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        PlayerPrefs.SetString(PLAYER_NAME, "Player" + UnityEngine.Random.Range(100, 1000));
 
         playerDataNetworkList = new NetworkList<PlayerData>();
         playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
@@ -52,22 +51,18 @@ public class MultiplayerManager : NetworkBehaviour
     }
 
 
-    
     public void StartHost()
     {
+
         NetworkManager.Singleton.ConnectionApprovalCallback += NetworkManager_ConnectionApprovalCallback;
         NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
         NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Server_OnClientDisconnectCallback;
         NetworkManager.Singleton.StartHost();
+
         NetworkManager.Singleton.SceneManager.LoadScene("LobbyScene", LoadSceneMode.Single);
     }
 
-    private void NetworkManager_OnClientConnectedCallback(ulong clientId)
-    {
-        playerDataNetworkList.Add(new PlayerData { 
-            clientId = clientId 
-        });
-    }
+
 
     private void NetworkManager_Server_OnClientDisconnectCallback(ulong clientId)
     {
@@ -82,34 +77,47 @@ public class MultiplayerManager : NetworkBehaviour
         }
     }
 
+    private void NetworkManager_OnClientConnectedCallback(ulong clientId)
+    {
+        playerDataNetworkList.Add(new PlayerData
+        {
+            clientId = clientId,
+            skinIndex = 0,
+            color = Color.white
+        });
+        SetPlayerNameServerRpc(GetPlayerName());
+        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
+    }
+
+
     private void NetworkManager_ConnectionApprovalCallback(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
-       
         if (NetworkManager.Singleton.ConnectedClientsIds.Count >= MAX_PLAYER_AMOUNT)
         {
             connectionApprovalResponse.Approved = false;
-            connectionApprovalResponse.Reason = "La sala está completa";
+            connectionApprovalResponse.Reason = "La Partida está completa";
             return;
         }
 
         connectionApprovalResponse.Approved = true;
-        Debug.Log("Conexión aprobada");
     }
-
-
 
     public void StartClient()
     {
         OnTryingToJoinGame?.Invoke(this, EventArgs.Empty);
 
-        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
-        NetworkManager.Singleton.StartClient();   
+        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Client_OnClientDisconnectCallback;
+        NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Client_OnClientConnectedCallback;
+        NetworkManager.Singleton.StartClient();
     }
 
-    private void NetworkManager_OnClientDisconnectCallback(ulong obj)
+    private void NetworkManager_Client_OnClientConnectedCallback(ulong clientId)
     {
-        OnFailedToJoinGame?.Invoke(this, EventArgs.Empty);
+        SetPlayerNameServerRpc(GetPlayerName());
+        SetPlayerIdServerRpc(AuthenticationService.Instance.PlayerId);
     }
+
+
 
     [ServerRpc(RequireOwnership = false)]
     private void SetPlayerNameServerRpc(string name, ServerRpcParams serverRpcParams = default)
@@ -124,19 +132,19 @@ public class MultiplayerManager : NetworkBehaviour
     private void SetPlayerIdServerRpc(string playerId, ServerRpcParams serverRpcParams = default)
     {
         int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
-
         PlayerData playerData = playerDataNetworkList[playerDataIndex];
-
         playerData.playerId = playerId;
-
         playerDataNetworkList[playerDataIndex] = playerData;
     }
 
 
-   
+    private void NetworkManager_Client_OnClientDisconnectCallback(ulong clientId)
+    {
+        OnFailedToJoinGame?.Invoke(this, EventArgs.Empty);
+    }
+
     public bool IsPlayerIndexConnected(int playerIndex)
     {
-        Debug.Log(playerDataNetworkList.Count);
         return (playerIndex < playerDataNetworkList.Count);
     }
 
@@ -170,6 +178,18 @@ public class MultiplayerManager : NetworkBehaviour
         return playerDataNetworkList[playerIndex];
     }
 
+    public int GetPlayerSkinIndexFromPlayerIndex(int playerIndex)
+    {
+        return playerDataNetworkList[playerIndex].skinIndex;
+    }
+
+
+    public void SetPlayerSkin(int skinIndex)
+    {
+        ChangePlayerSkinServerRpc(skinIndex);
+    }
+
+
 
     [ServerRpc(RequireOwnership = false)]
     private void ChangePlayerSkinServerRpc(int skinIndex, ServerRpcParams serverRpcParams = default)
@@ -182,6 +202,49 @@ public class MultiplayerManager : NetworkBehaviour
         playerData.skinIndex = skinIndex;
 
         playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+
+    public void SetPlayerColor(Color color)
+    {
+        SetPlayerColorServerRpc(color);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetPlayerColorServerRpc(Color color, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+
+        PlayerData playerData = playerDataNetworkList[playerDataIndex];
+
+        playerData.color = color;
+
+        playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+    public void IsPlayerReady(bool isReady)
+    {
+        IsPlayerReadyServerRpc(isReady);
+    }
+
+
+    [ServerRpc(RequireOwnership = false)]
+    private void IsPlayerReadyServerRpc(bool isReady, ServerRpcParams serverRpcParams = default)
+    {
+        int playerDataIndex = GetPlayerDataIndexFromClientId(serverRpcParams.Receive.SenderClientId);
+
+        PlayerData playerData = playerDataNetworkList[playerDataIndex];
+
+        playerData.isPlayerReady = isReady;
+
+        playerDataNetworkList[playerDataIndex] = playerData;
+    }
+
+
+    public void KickPlayer(ulong clientId)
+    {
+        NetworkManager.Singleton.DisconnectClient(clientId);
+        NetworkManager_Server_OnClientDisconnectCallback(clientId);
     }
 
 

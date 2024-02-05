@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
+
 
 public class PlayerController : NetworkBehaviour
 {
 
-    public static event EventHandler OnAnyPlayerSpawed;
+    // Eventos para sincronización Jugadores
+    public static event EventHandler OnAnyPlayerSpawned;
 
+    // Variable para identificar el jugador propio.
     public static PlayerController LocalInstance { get; private set; }
 
+    // Variables del controlador del jugador
     [SerializeField] private float velocidad;
     [SerializeField] private float fuerzaSalto;
     [SerializeField] private GameObject bulletSpawner;
@@ -17,62 +22,104 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private GameObject weapon;
     [SerializeField] private List<GameObject> skinList;
 
+
     private Rigidbody2D rb;
-    //private Animator anim;
+    private Animator anim;
     private PlayerData localPlayerData;
     private GameObject localSkin;
-    private int skinIndex = 0;
-    private Camera mainCamera;
-
-    private bool right;
+    private Camera cam;
 
 
 
     private void Awake()
     {
-        right = true;
+        // Para evitar que el jugador se destruya en los cambios de escena.
         DontDestroyOnLoad(transform.gameObject);
+
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-
-        //   localPlayerData.playerName = MultiplayerManager.Instance.GetPlayerName();
-
+        // Cargamos los datos multijugador
+        PlayerSetUp(OwnerClientId);
         rb = GetComponent<Rigidbody2D>();
-        //anim = GetComponentInChildren<Animator>();
-        localSkin = skinList[skinIndex];
-        weapon.transform.SetParent(localSkin.transform);
-
-        this.transform.SetPositionAndRotation(new Vector3(-1f, 0f, 0), Quaternion.identity);
-
     }
 
-
+    // Este método se ejecuta cuando se instancia en red en todos los clientes.
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
         {
             LocalInstance = this;
+            // Asignamos la cámara al jugador local.
+            cam = FindObjectOfType<Camera>();
+        }
+        // Cargamos las configuraciones de los jugadores
+        localPlayerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
+
+        OnAnyPlayerSpawned?.Invoke(this, EventArgs.Empty);
+
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
         }
 
-        OnAnyPlayerSpawed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void NetworkManager_OnClientDisconnectCallback(ulong clientId)
+    {
+        throw new NotImplementedException();
+    }
+
+
+    // Método para establecer la skin del jugador.
+    public void SetPlayerSkin(int skin)
+    {
+        for (int i = 0; i < skinList.Count; i++)
+        {
+            if (i != skin)
+            {
+                skinList[i].SetActive(false);
+            }
+        }
+
+        localSkin = skinList[skin];
+        localSkin.SetActive(true);
+        anim = localSkin.GetComponent<Animator>();
+        weapon.transform.SetParent(localSkin.transform);
+    }
+
+    // Método para establecer el clor del skin actual.
+    public void SetPlayerColor(Color color)
+    {
+        GetComponentInChildren<SpriteRenderer>().color = color;
+    }
+
+    // Método que carga en el jugador la configuración del cliente.
+    public void PlayerSetUp(ulong clientId)
+    {
+        localPlayerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(clientId);
+        SetPlayerSkin(localPlayerData.skinIndex);
+        SetPlayerColor(localPlayerData.color);
     }
 
 
     // Update is called once per frame
     void Update()
     {
+        // Para ejecutar los movimientos sólo en el propietario.   
         if (!IsOwner)
             return;
 
         Move();
         CheckFire();
+
     }
 
+    // Método para gestionar el movimiento.
     public void Move()
     {
+
         if (this.transform.rotation == Quaternion.identity) // Desplazamiento hacia la derecha
         {
             rb.velocity = (transform.right * velocidad * Input.GetAxis("Horizontal")) +
@@ -105,30 +152,30 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Actualizamos la animación
-        //anim.SetFloat("velocidadX", Mathf.Abs(rb.velocity.x));
-        //anim.SetFloat("velocidadY", rb.velocity.y);
+        anim.SetFloat("velocidadX", Mathf.Abs(rb.velocity.x));
+        anim.SetFloat("velocidadY", rb.velocity.y);
 
-        Camera.main.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, -10f);
+        // Seguimiento de cámara
+        cam.transform.SetPositionAndRotation(new Vector3(this.transform.position.x + 2, this.transform.position.y + 2, -10), Quaternion.identity);
+
     }
 
 
+    // Método para disparar
     public void CheckFire()
     {
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetKeyDown(KeyCode.Space))
             FireServerRpc(localSkin.transform.rotation, bulletSpawner.transform.position);
     }
 
+    // Método que instancia en el servidor la bala. 
     [ServerRpc(RequireOwnership = false)]
-    private void FireServerRpc(Quaternion rotation, Vector3 position)
+    private void FireServerRpc(Quaternion rotation, Vector3 position, ServerRpcParams serverRpcParams = default)
     {
-        GameObject bullet = Instantiate(bulletPrefab);
-        NetworkObject bulletNetwork = bullet.GetComponent<NetworkObject>();
-        bulletNetwork.Spawn(true);
-        bullet.transform.rotation = rotation;
-        bulletNetwork.transform.rotation = rotation;
-        bullet.transform.position = position;
-        bulletNetwork.transform.position = position;
+        GameObject bullet = Instantiate(bulletPrefab, position, rotation);
 
+        NetworkObject bulletNetwork = bullet.GetComponent<NetworkObject>();
+        bulletNetwork.SpawnWithOwnership(serverRpcParams.Receive.SenderClientId);
 
         Destroy(bullet, 2f);
     }
@@ -136,32 +183,33 @@ public class PlayerController : NetworkBehaviour
 
 
 
-
-    public void SelectSkin(int skinIndex)
-    {
-        if (!IsOwner)
+    /* Válido para modo Sigle
+     * 
+        public void SelectSkin(int skinIndex)
         {
-            return;
+            if (!IsOwner)
+            {
+                return;
+            }
+            // Asignamos los elementos a la nueva skin
+            this.skinIndex = skinIndex;
+            GameObject newSkin = skinList[skinIndex];            
+            newSkin.transform.rotation = localSkin.transform.rotation;
+            weapon.transform.SetParent(newSkin.transform);
+            
+        
+            //Desactivamos la anterior
+            localSkin.SetActive(false);
+            //Activamos el nuevo
+            newSkin.SetActive(true);
+            
+            // Reasignamos nombres.
+            localSkin = newSkin;
+        
+            // Actualizamos la animación
+            anim = GetComponentInChildren<Animator>();
         }
-        // Asignamos los elementos a la nueva skin
-        this.skinIndex = skinIndex;
-        GameObject newSkin = skinList[skinIndex];
-        newSkin.transform.rotation = localSkin.transform.rotation;
-        weapon.transform.SetParent(newSkin.transform);
-
-
-        //Desactivamos la anterior
-        localSkin.SetActive(false);
-        //Activamos el nuevo
-        newSkin.SetActive(true);
-
-        // Reasignamos nombres.
-        localSkin = newSkin;
-
-        // Actualizamos la animación
-        //anim = GetComponentInChildren<Animator>();
-    }
-
+    */
 
 
 
