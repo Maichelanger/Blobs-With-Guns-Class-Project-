@@ -1460,6 +1460,7 @@ GameObject:
   m_Component:
   - component: {fileID: 343971339}
   - component: {fileID: 343971340}
+  - component: {fileID: 343971341}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -1494,9 +1495,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0ea493c897fd044fa38a3af5e22bf90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameReady:
+    m_InternalValue: 0
   mainMenuUI: {fileID: 1669321430}
   multiplayerMenuUI: {fileID: 962401816}
   newLobbyMenuUI: {fileID: 582266184}
+  playerPrefab: {fileID: 0}
+--- !u!114 &343971341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343971338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 1197984877
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &403878359
 GameObject:
   m_ObjectHideFlags: 0
@@ -3502,8 +3526,11 @@ MonoBehaviour:
   newLobbyButton: {fileID: 877430097}
   codeJoinButton: {fileID: 113771457}
   codeInputField: {fileID: 1094893966}
-  multiplayerMenuUI: {fileID: 582266184}
-  newLobbyUI: {fileID: 877430095}
+  closeButton: {fileID: 0}
+  multiplayerMenuUI: {fileID: 0}
+  newLobbyUI: {fileID: 582266184}
+  lobbyListUI: {fileID: 42629011}
+  lobbyTemplate: {fileID: 89347230}
 --- !u!1 &1068590110
 GameObject:
   m_ObjectHideFlags: 0
