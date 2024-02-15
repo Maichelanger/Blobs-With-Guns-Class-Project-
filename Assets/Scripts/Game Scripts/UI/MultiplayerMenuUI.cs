@@ -1,31 +1,22 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MultiplayerMenuUI : MonoBehaviour
 {
-
     [SerializeField] private TMP_InputField playerNameInputField;
     [SerializeField] private Button quickJoinButton;
     [SerializeField] private Button newLobbyButton;
     [SerializeField] private Button codeJoinButton;
     [SerializeField] private TMP_InputField codeInputField;
-
     [SerializeField] private Button closeButton;
     [SerializeField] private GameObject multiplayerMenuUI;
     [SerializeField] private GameObject newLobbyUI;
     [SerializeField] private Transform lobbyListUI;
     [SerializeField] private Transform lobbyTemplate;
 
-
-
-
-    // Start is called before the first frame update
     void Start()
     {
         quickJoinButton.interactable = false;
@@ -44,12 +35,10 @@ public class MultiplayerMenuUI : MonoBehaviour
             InputValueCheck();
         });
 
-
         quickJoinButton.onClick.AddListener(() =>
         {
             LobbyManager.Instance.QuickJoin();
         });
-
 
         newLobbyButton.onClick.AddListener(() =>
         {
@@ -61,24 +50,22 @@ public class MultiplayerMenuUI : MonoBehaviour
             LobbyManager.Instance.JoinWithCode(codeInputField.text);
         });
 
-
         closeButton.onClick.AddListener(() =>
         {
             multiplayerMenuUI.SetActive(false);
         });
 
-
-
         LobbyManager.Instance.OnLobbyListChanged += LobbyManager_OnLobbyListChanged;
         UpdateLobbyList(new List<Lobby>());
-
     }
 
+    // Event handler for the lobby list changed event
     private void LobbyManager_OnLobbyListChanged(object sender, LobbyManager.OnLobbyListChangedEventArgs e)
     {
         UpdateLobbyList(e.LobbyList);
     }
 
+    // Check the input values and update the button interactability accordingly
     public void InputValueCheck()
     {
         if (playerNameInputField.text != null && playerNameInputField.text.Length > 0)
@@ -100,10 +87,9 @@ public class MultiplayerMenuUI : MonoBehaviour
             newLobbyButton.interactable = false;
             codeJoinButton.interactable = false;
         }
-
     }
 
-
+    // Update the lobby list UI based on the provided lobby list
     private void UpdateLobbyList(List<Lobby> lobbyList)
     {
         foreach (Transform child in lobbyListUI)
@@ -119,6 +105,4 @@ public class MultiplayerMenuUI : MonoBehaviour
             lobbyTransform.GetComponent<LobbyListUI>().SetLobby(lobby);
         }
     }
-
-
 }

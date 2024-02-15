@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class NewLobbuUI : MonoBehaviour
 {
-
     [SerializeField] private TMP_InputField lobbyNameInputField;
     [SerializeField] private Button publicLobbyButton;
     [SerializeField] private Button privateLobbyButton;

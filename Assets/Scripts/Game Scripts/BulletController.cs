@@ -1,20 +1,13 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 public class BulletController : NetworkBehaviour
 {
-
+    [SerializeField] private float speed;
 
     public static BulletController LocalInstance { get; private set; }
 
-    // Declaración de variables
     private Rigidbody2D rb;
-    [SerializeField] private float speed;
-
-
 
     public override void OnNetworkSpawn()
     {
@@ -23,10 +16,7 @@ public class BulletController : NetworkBehaviour
             LocalInstance = this;
             rb = LocalInstance.GetComponent<Rigidbody2D>();
         }
-
-
     }
-
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -34,7 +24,6 @@ public class BulletController : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-
     }
 
     private void FixedUpdate()
@@ -44,7 +33,5 @@ public class BulletController : NetworkBehaviour
             rb.MovePosition(transform.position + transform.right * speed * Time.fixedDeltaTime);
             Debug.Log(rb.position);
         }
-
     }
-
 }
