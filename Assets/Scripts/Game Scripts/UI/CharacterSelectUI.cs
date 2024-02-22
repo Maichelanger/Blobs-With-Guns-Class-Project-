@@ -10,8 +10,8 @@ public class CharacterSelectUI : MonoBehaviour
 {
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button readyButton;
-    [SerializeField] private Button skin1Button;
-    [SerializeField] private Button skin2Button;
+    //[SerializeField] private Button skin1Button;
+    //[SerializeField] private Button skin2Button;
     [SerializeField] private TMP_Text lobbyName;
     [SerializeField] private TMP_Text lobbyCode;
     [SerializeField] private Button noColorButton;
@@ -50,7 +50,7 @@ public class CharacterSelectUI : MonoBehaviour
             Debug.Log("Player Ready: " + GameManager.Instance.IsLocalPlayerReady());
             Debug.Log("Game Ready: " + GameManager.Instance.gameReady.Value);
         });
-
+        /*
         skin1Button.onClick.AddListener(() =>
         {
             MultiplayerManager.Instance.SetPlayerSkin(0);
@@ -60,15 +60,15 @@ public class CharacterSelectUI : MonoBehaviour
         {
             MultiplayerManager.Instance.SetPlayerSkin(1);
         });
-
+        */
         noColorButton.onClick.AddListener(() =>
         {
-            MultiplayerManager.Instance.SetPlayerColor(new Color(1, 1, 1, 0.5f));
+            MultiplayerManager.Instance.SetPlayerColor(new Color(1, 1, 1, 1f));
         });
 
         whiteButton.onClick.AddListener(() =>
         {
-            MultiplayerManager.Instance.SetPlayerColor(new Color(1, 1, 1, 1));
+            MultiplayerManager.Instance.SetPlayerColor(new Color(0, 0, 0, 1));
         });
 
         blueButton.onClick.AddListener(() =>

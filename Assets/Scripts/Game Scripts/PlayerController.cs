@@ -11,9 +11,9 @@ public class PlayerController : NetworkBehaviour
 
     [SerializeField] private float velocidad;
     [SerializeField] private float fuerzaSalto;
-    //[SerializeField] private GameObject bulletSpawner;
-    //[SerializeField] private GameObject bulletPrefab;
-    //[SerializeField] private GameObject weapon;
+    [SerializeField] private GameObject bulletSpawner;
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private GameObject weapon;
     [SerializeField] private List<GameObject> skinList;
 
     private Rigidbody2D rb;
@@ -78,7 +78,7 @@ public class PlayerController : NetworkBehaviour
         localSkin = skinList[skin];
         localSkin.SetActive(true);
         //anim = localSkin.GetComponent<Animator>();
-        //weapon.transform.SetParent(localSkin.transform);
+        weapon.transform.SetParent(localSkin.transform);
     }
 
     // Sets the player's color to the given color
@@ -134,19 +134,19 @@ public class PlayerController : NetworkBehaviour
     // Checks if the player should fire and triggers the server RPC
     public void CheckFire()
     {
-        //if (Input.GetKeyDown(KeyCode.Space))
-            //FireServerRpc(localSkin.transform.rotation, bulletSpawner.transform.position);
+        if (Input.GetKeyDown(KeyCode.Space))
+            FireServerRpc(localSkin.transform.rotation, bulletSpawner.transform.position);
     }
 
     // Server RPC method for firing a bullet
     [ServerRpc(RequireOwnership = false)]
     private void FireServerRpc(Quaternion rotation, Vector3 position, ServerRpcParams serverRpcParams = default)
     {
-        //GameObject bullet = Instantiate(bulletPrefab, position, rotation);
+        GameObject bullet = Instantiate(bulletPrefab, position, rotation);
 
-        //NetworkObject bulletNetwork = bullet.GetComponent<NetworkObject>();
-        //bulletNetwork.SpawnWithOwnership(serverRpcParams.Receive.SenderClientId);
+        NetworkObject bulletNetwork = bullet.GetComponent<NetworkObject>();
+        bulletNetwork.SpawnWithOwnership(serverRpcParams.Receive.SenderClientId);
 
-        //Destroy(bullet, 2f);
+        Destroy(bullet, 2f);
     }
 }

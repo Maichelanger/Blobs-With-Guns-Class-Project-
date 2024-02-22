@@ -35,14 +35,14 @@ public class CharacterSelectPlayer : MonoBehaviour
             Show();
             PlayerData playerData = MultiplayerManager.Instance.GetPlayerDataFromPlayerIndex(playerIndex);
             playerNameTmpTxt.text = playerData.playerName.ToString();
-
+            /*
             foreach (GameObject skin in skinList)
             {
                 skin.SetActive(false);
             }
 
             skinList[playerData.skinIndex].SetActive(true);
-
+            */
             if (playerData.color != null)
             {
                 GetComponentInChildren<SpriteRenderer>().color = playerData.color;
