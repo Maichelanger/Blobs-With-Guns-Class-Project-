@@ -20,7 +20,7 @@ public class PlayerController : NetworkBehaviour
     //private Animator anim;
     private PlayerData localPlayerData;
     private GameObject localSkin;
-    private Camera cam;
+    //private Camera cam;
 
     private void Awake()
     {
@@ -46,7 +46,7 @@ public class PlayerController : NetworkBehaviour
         if (IsOwner)
         {
             LocalInstance = this;
-            cam = FindObjectOfType<Camera>();
+            //cam = FindObjectOfType<Camera>();
         }
         localPlayerData = MultiplayerManager.Instance.GetPlayerDataFromClientId(OwnerClientId);
 
@@ -128,7 +128,7 @@ public class PlayerController : NetworkBehaviour
         //anim.SetFloat("velocidadX", Mathf.Abs(rb.velocity.x));
         //anim.SetFloat("velocidadY", rb.velocity.y);
 
-        cam.transform.SetPositionAndRotation(new Vector3(this.transform.position.x + 2, this.transform.position.y + 2, -10), Quaternion.identity);
+        //cam.transform.SetPositionAndRotation(new Vector3(this.transform.position.x + 2, this.transform.position.y + 2, -10), Quaternion.identity);
     }
 
     // Checks if the player should fire and triggers the server RPC

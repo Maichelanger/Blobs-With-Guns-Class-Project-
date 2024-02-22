@@ -52,6 +52,7 @@ public class GameManager : NetworkBehaviour
 
     // This method is called when the load event for a scene is completed.
     // It checks if the loaded scene is the "GameScene" and if so, it instantiates player objects for each connected client.
+    
     private void GameManager_OnLoadEventCompleted(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
         if (sceneName == "GameScene")

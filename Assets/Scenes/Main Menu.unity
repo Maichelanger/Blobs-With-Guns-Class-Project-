@@ -1500,7 +1500,7 @@ MonoBehaviour:
   mainMenuUI: {fileID: 1669321430}
   multiplayerMenuUI: {fileID: 962401816}
   newLobbyMenuUI: {fileID: 582266184}
-  playerPrefab: {fileID: 0}
+  playerPrefab: {fileID: 7183244499121089149, guid: dd6a7c3e38c13e744905eafebf20169e, type: 3}
 --- !u!114 &343971341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3527,7 +3527,7 @@ MonoBehaviour:
   codeJoinButton: {fileID: 113771457}
   codeInputField: {fileID: 1094893966}
   closeButton: {fileID: 0}
-  multiplayerMenuUI: {fileID: 0}
+  multiplayerMenuUI: {fileID: 962401816}
   newLobbyUI: {fileID: 582266184}
   lobbyListUI: {fileID: 42629011}
   lobbyTemplate: {fileID: 89347230}
@@ -5687,7 +5687,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 2122929864}
-    PlayerPrefab: {fileID: 8677719568319961296, guid: dd6a7c3e38c13e744905eafebf20169e, type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: a0bd62fa162045247bbeb956a541c641, type: 2}

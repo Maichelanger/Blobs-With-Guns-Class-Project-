@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 // It also includes events for notifying when a player is trying to join a game, when a player fails to join a game, and when the player data network list changes.
 public class MultiplayerManager : NetworkBehaviour
 {
-    public const int MAX_PLAYER_AMOUNT = 4;
+    public const int MAX_PLAYER_AMOUNT = 2;
     private const string PLAYER_NAME = "NombreJugador";
     public static MultiplayerManager Instance { get; private set; }
     public event EventHandler OnTryingToJoinGame;
