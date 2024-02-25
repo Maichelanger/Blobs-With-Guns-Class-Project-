@@ -25,6 +25,7 @@ public class MultiplayerManager : NetworkBehaviour
 
     private NetworkList<PlayerData> playerDataNetworkList;
     private string playerName;
+    private int round = 0;
 
     private void Awake()
     {
@@ -244,5 +245,27 @@ public class MultiplayerManager : NetworkBehaviour
     {
         NetworkManager.Singleton.DisconnectClient(clientId);
         NetworkManager_Server_OnClientDisconnectCallback(clientId);
+    }
+
+    internal void UpdateGameRound()
+    {
+        round++;
+    }
+
+    internal void CheckRestartScene()
+    {
+        foreach (var player in FindObjectsOfType<PlayerController>())
+        {
+            Destroy(player.gameObject);
+        }
+
+        if (round == 3)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("Main Menu", LoadSceneMode.Single);
+        }
+        else
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+        }
     }
 }

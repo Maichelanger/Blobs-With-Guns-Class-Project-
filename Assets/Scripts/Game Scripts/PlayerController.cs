@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -21,10 +22,12 @@ public class PlayerController : NetworkBehaviour
     private PlayerData localPlayerData;
     private GameObject localSkin;
     //private Camera cam;
+    private bool canShoot = false;
 
     private void Awake()
     {
         DontDestroyOnLoad(transform.gameObject);
+        StartCoroutine(ShootCooldown());
     }
 
     private void Start()
@@ -134,7 +137,7 @@ public class PlayerController : NetworkBehaviour
     // Checks if the player should fire and triggers the server RPC
     public void CheckFire()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && canShoot)
             FireServerRpc(localSkin.transform.rotation, bulletSpawner.transform.position);
     }
 
@@ -148,5 +151,20 @@ public class PlayerController : NetworkBehaviour
         bulletNetwork.SpawnWithOwnership(serverRpcParams.Receive.SenderClientId);
 
         Destroy(bullet, 2f);
+    }
+
+    // Method called by the bullet when it hits a player. It restarts the scene and updates the game rounds
+    public void HasBeenShot()
+    {
+        MultiplayerManager.Instance.UpdateGameRound();
+        MultiplayerManager.Instance.CheckRestartScene();
+
+    }
+
+    IEnumerator ShootCooldown()
+    {
+        canShoot = false;
+        yield return new WaitForSeconds(3f);
+        canShoot = true;
     }
 }

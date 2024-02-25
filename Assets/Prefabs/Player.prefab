@@ -346,7 +346,7 @@ MonoBehaviour:
   velocidad: 5
   fuerzaSalto: 259
   bulletSpawner: {fileID: 5686213152810542297}
-  bulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 7171320013431059086, guid: 37049c4c4b182154d9bb132cb9f3ba61, type: 3}
   weapon: {fileID: 4649218738171738513}
   skinList:
   - {fileID: 8178221673073816827}

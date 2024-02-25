@@ -22,6 +22,11 @@ public class BulletController : NetworkBehaviour
     {
         if (IsServer)
         {
+            if (collision.CompareTag("Player"))
+            {
+                collision.GetComponent<PlayerController>().HasBeenShot();
+            }
+
             Destroy(gameObject);
         }
     }
@@ -31,7 +36,6 @@ public class BulletController : NetworkBehaviour
         if (IsOwner)
         {
             rb.MovePosition(transform.position + transform.right * speed * Time.fixedDeltaTime);
-            Debug.Log(rb.position);
         }
     }
 }
