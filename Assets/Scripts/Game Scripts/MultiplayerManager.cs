@@ -261,7 +261,17 @@ public class MultiplayerManager : NetworkBehaviour
 
         if (round == 3)
         {
+            Application.Quit();
+
+            /*
             NetworkManager.Singleton.SceneManager.LoadScene("Main Menu", LoadSceneMode.Single);
+
+            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Client_OnClientDisconnectCallback;
+            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Client_OnClientConnectedCallback;
+            LobbyManager.Instance.DeleteLobby();
+            NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
+            NetworkManager.Singleton.Shutdown();
+            */
         }
         else
         {

@@ -105,4 +105,9 @@ public class MultiplayerMenuUI : MonoBehaviour
             lobbyTransform.GetComponent<LobbyListUI>().SetLobby(lobby);
         }
     }
+
+    public void CloseGame()
+    {
+        Application.Quit();
+    }
 }
